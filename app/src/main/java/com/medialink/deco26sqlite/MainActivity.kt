@@ -1,12 +1,18 @@
 package com.medialink.deco26sqlite
 
 import android.content.Intent
+import android.database.ContentObserver
+import android.database.Cursor
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.medialink.deco26sqlite.adapter.NoteAdapter
+import com.medialink.deco26sqlite.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
 import com.medialink.deco26sqlite.db.NoteHelper
 import com.medialink.deco26sqlite.entity.Note
 import com.medialink.deco26sqlite.helper.MappingHelper
@@ -41,8 +47,19 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, NoteAddUpdateActivity.REQUEST_ADD)
         }
 
-        noteHelper = NoteHelper.getInstance(applicationContext)
-        noteHelper.open()
+        val handleThread = HandlerThread("DataObserver")
+        handleThread.start()
+        val handler = Handler(handleThread.looper)
+        val myObserver = object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean) {
+                loadNotesAsync()
+            }
+        }
+
+        contentResolver.registerContentObserver(CONTENT_URI, true, myObserver)
+
+        /*noteHelper = NoteHelper.getInstance(applicationContext)
+        noteHelper.open()*/
 
         if (savedInstanceState == null) {
             // proses ambil data
@@ -64,7 +81,14 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             progressbar.visibility = View.VISIBLE
             val deferredNotes = async(Dispatchers.IO) {
-                val cursor = noteHelper.queryAll()
+//                val cursor = noteHelper.queryAll()
+                Log.d("debug", CONTENT_URI.toString())
+                val cursor = contentResolver?.query(CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    null) as Cursor
+
                 MappingHelper.mapCursorToArrayList(cursor)
             }
             progressbar.visibility = View.INVISIBLE
@@ -82,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        noteHelper.close()
+        //noteHelper.close()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
