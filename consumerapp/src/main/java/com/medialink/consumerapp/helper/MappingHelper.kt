@@ -1,23 +1,14 @@
-package com.medialink.deco26sqlite.helper
+package com.medialink.consumerapp.helper
 
 import android.database.Cursor
-import com.medialink.deco26sqlite.db.DatabaseContract
-import com.medialink.deco26sqlite.entity.Note
+import com.medialink.consumerapp.db.DatabaseContract
+import com.medialink.consumerapp.entity.Note
 
 object MappingHelper {
     fun mapCursorToArrayList(notesCursor: Cursor): ArrayList<Note> {
-        var notesList = ArrayList<Note>()
-        /*notesCursor.moveToFirst()
+        val notesList = ArrayList<Note>()
+        notesCursor.moveToFirst()
         while (notesCursor.moveToNext()) {
-            val id = notesCursor.getInt(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns._ID))
-            val title = notesCursor.getString(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns.TITLE))
-            val description = notesCursor.getString(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns.DESCRIPTION))
-            val date = notesCursor.getString(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns.DATE))
-            notesList.add(Note(id, title, description, date))
-        }*/
-
-        (1..notesCursor.count).map {
-            notesCursor.moveToNext()
             val id = notesCursor.getInt(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns._ID))
             val title = notesCursor.getString(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns.TITLE))
             val description = notesCursor.getString(notesCursor.getColumnIndexOrThrow(DatabaseContract.NoteColumns.DESCRIPTION))
